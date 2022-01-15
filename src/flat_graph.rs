@@ -1,15 +1,15 @@
 #![allow(dead_code)]
 
 use rand::Rng;
+use rand_chacha::rand_core::SeedableRng;
+use rand_chacha::ChaChaRng;
 use std::collections::VecDeque;
 use std::fmt;
 use std::fmt::Formatter;
-use rand_chacha::ChaChaRng;
-use rand_chacha::rand_core::SeedableRng;
 
 #[derive(Clone)]
 pub(crate) struct FlatGraph {
-    max_size: usize,
+    pub max_capacity: usize,
     current_size: usize,
     nodes: Vec<Option<Color>>,
     vertices: Vec<Option<Vertex>>,
@@ -18,7 +18,7 @@ pub(crate) struct FlatGraph {
 impl FlatGraph {
     pub fn new(max_nodes: usize) -> FlatGraph {
         FlatGraph {
-            max_size: max_nodes,
+            max_capacity: max_nodes,
             current_size: 0,
             nodes: vec![None; max_nodes],
             vertices: vec![None; max_nodes - 1],
@@ -56,16 +56,65 @@ impl FlatGraph {
                 direction: vertex_direction,
             });
         }
-        self.current_size = self.max_size;
+        self.current_size = self.max_capacity;
     }
 
-    pub fn get_node(&self, index: usize) -> Option<Color> {
-        self.nodes[index]
+    pub fn get_node(&self, index: usize) -> Result<&Option<Color>, String> {
+        self.nodes
+            .get(index)
+            .ok_or(format!("Node index {} out of bounds", index))
+    }
+
+    pub fn get_vertex(&self, index: usize) -> Result<&Option<Vertex>, String> {
+        self.vertices
+            .get(index)
+            .ok_or(format!("Vertice index {} out of bounds", index))
+    }
+
+    pub fn node_exists(&self, index: usize) -> bool {
+        self.nodes.get(index).is_some() && self.nodes.get(index).unwrap().is_some()
+    }
+
+    pub fn vertex_exists(&self, index: usize) -> bool {
+        self.vertices.get(index).is_some() && self.vertices.get(index).unwrap().is_some()
+    }
+
+    pub fn add_node(&mut self, index: usize, color: Color) -> Result<(), String> {
+        if self.current_size >= self.max_capacity {
+            return Err(format!("Cannot add node at index >= graph max capacity"));
+        }
+        if self.node_exists(index) {
+            return Err(format!("Node index {} already exists", index));
+        }
+        self.nodes[index] = Some(color);
+        self.current_size += 1;
+        Ok(())
+    }
+
+    pub fn add_vertex(
+        &mut self,
+        index: usize,
+        color: Color,
+        direction: VertexDirection,
+    ) -> Result<(), String> {
+        if self.current_size >= self.max_capacity - 1 {
+            return Err(format!(
+                "Cannot add vertex at index >= graph max capacity - 1"
+            ));
+        }
+        if self.vertex_exists(index) {
+            return Err(format!("Vertex index {} already exists", index));
+        }
+        self.vertices[index] = Some(Vertex { color, direction });
+        Ok(())
     }
 
     pub fn remove_node(&mut self, index: usize) -> Result<(), String> {
-        if index >= self.max_size {
+        if index >= self.max_capacity {
             return Err(format!("Index {} is out of bounds", index));
+        }
+        if !self.node_exists(index) {
+            return Err(format!("Node index {} does not exist", index));
         }
         self.nodes[index] = None;
         self.current_size -= 1;
@@ -75,7 +124,10 @@ impl FlatGraph {
             }
             self.vertices[index - 1] = None;
         }
-        if index != self.max_size - 1 && self.nodes[index + 1].is_some() && self.vertices[index].is_some() {
+        if index != self.max_capacity - 1
+            && self.nodes[index + 1].is_some()
+            && self.vertices[index].is_some()
+        {
             if self.vertices[index].unwrap().direction == VertexDirection::RIGHT {
                 self.nodes[index + 1] = Option::from(self.vertices[index].unwrap().color);
             }
@@ -92,7 +144,7 @@ impl FlatGraph {
 impl fmt::Display for FlatGraph {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut result = String::new();
-        for i in 0..=self.max_size - 1 {
+        for i in 0..=self.max_capacity - 1 {
             match self.nodes[i] {
                 Some(Color::RED) => {
                     result.push_str("(R)");
@@ -104,7 +156,7 @@ impl fmt::Display for FlatGraph {
                     result.push_str(" ");
                 }
             }
-            if i == self.max_size - 1 {
+            if i == self.max_capacity - 1 {
                 continue;
             }
             match self.vertices[i] {
@@ -128,8 +180,8 @@ pub(crate) enum VertexDirection {
 
 #[derive(Clone, Copy)]
 pub(crate) struct Vertex {
-    color: Color,
-    direction: VertexDirection,
+    pub color: Color,
+    pub direction: VertexDirection,
 }
 
 impl fmt::Display for Vertex {
