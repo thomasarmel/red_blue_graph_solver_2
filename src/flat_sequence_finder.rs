@@ -146,7 +146,7 @@ impl FlatSequenceFinder {
             && self.flat_graph_copy.get_node(node_dst).unwrap().unwrap() != self.color_to_remove
     }
 
-    pub fn get_sequence_max(&mut self) {
+    pub fn calculate_sequence_max(&mut self) {
         let mut current_node: usize = 0;
         while current_node < self.flat_graph_copy.max_capacity {
             if self.node_may_be_interesting_to_remove(current_node, VertexDirection::RIGHT) {
