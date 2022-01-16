@@ -4,7 +4,7 @@ mod flat_graph;
 mod flat_sequence_finder;
 
 fn main() {
-    let mut flat_graph = flat_graph::FlatGraph::new(1000);
+    let mut flat_graph = flat_graph::FlatGraph::new(1000000);
     flat_graph.generate_random(0.5, 0.5, 0.5);
 
     //println!("{}", flat_graph);

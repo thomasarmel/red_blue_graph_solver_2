@@ -31,9 +31,9 @@ impl FlatGraph {
         red_edge_probability: f32,
         left_directed_edge_probability: f32,
     ) {
-        let mut chacha_secure_rng = ChaChaRng::from_entropy();
+        let mut hash_secure_rng = ChaChaRng::from_entropy();
         for node in self.nodes.iter_mut() {
-            match chacha_secure_rng.gen_range(0f32..1f32) {
+            match hash_secure_rng.gen_range(0f32..1f32) {
                 x if x < red_node_probability => {
                     *node = Some(Color::RED);
                 }
@@ -43,11 +43,11 @@ impl FlatGraph {
             }
         }
         for vertex in self.vertices.iter_mut() {
-            let vertex_color = match chacha_secure_rng.gen_range(0f32..1f32) {
+            let vertex_color = match hash_secure_rng.gen_range(0f32..1f32) {
                 x if x < red_edge_probability => Color::RED,
                 _ => Color::BLUE,
             };
-            let vertex_direction = match chacha_secure_rng.gen_range(0f32..1f32) {
+            let vertex_direction = match hash_secure_rng.gen_range(0f32..1f32) {
                 x if x < left_directed_edge_probability => VertexDirection::LEFT,
                 _ => VertexDirection::RIGHT,
             };
@@ -68,7 +68,7 @@ impl FlatGraph {
     pub fn get_vertex(&self, index: usize) -> Result<&Option<Vertex>, String> {
         self.vertices
             .get(index)
-            .ok_or(format!("Vertice index {} out of bounds", index))
+            .ok_or(format!("Vertex index {} out of bounds", index))
     }
 
     pub fn node_exists(&self, index: usize) -> bool {
