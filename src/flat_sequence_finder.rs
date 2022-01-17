@@ -3,7 +3,7 @@
 use crate::flat_graph::{Color, FlatGraph, VertexDirection};
 use std::collections::VecDeque;
 
-pub(crate) struct FlatSequenceFinder {
+pub struct FlatSequenceFinder {
     flat_graph_copy: FlatGraph,
     pub sequence_max: VecDeque<usize>,
     color_to_remove: Color,

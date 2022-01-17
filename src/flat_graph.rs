@@ -8,7 +8,7 @@ use std::fmt;
 use std::fmt::Formatter;
 
 #[derive(Clone)]
-pub(crate) struct FlatGraph {
+pub struct FlatGraph {
     pub max_capacity: usize,
     current_size: usize,
     nodes: Vec<Option<Color>>,
@@ -59,13 +59,13 @@ impl FlatGraph {
         self.current_size = self.max_capacity;
     }
 
-    pub fn get_node(&self, index: usize) -> Result<&Option<Color>, &str> {
+    pub fn get_node(&self, index: usize) -> Result<&Option<Color>, &'static str> {
         self.nodes
             .get(index)
             .ok_or("Node index out of bounds")
     }
 
-    pub fn get_vertex(&self, index: usize) -> Result<&Option<Vertex>, &str> {
+    pub fn get_vertex(&self, index: usize) -> Result<&Option<Vertex>, &'static str> {
         self.vertices
             .get(index)
             .ok_or("Vertex index out of bounds")
@@ -79,7 +79,7 @@ impl FlatGraph {
         self.vertices.get(index).is_some() && self.vertices.get(index).unwrap().is_some()
     }
 
-    pub fn add_node(&mut self, index: usize, color: Color) -> Result<(), &str> {
+    pub fn add_node(&mut self, index: usize, color: Color) -> Result<(), &'static str> {
         if self.current_size >= self.max_capacity {
             return Err("Cannot add node at index >= graph max capacity");
         }
@@ -96,7 +96,7 @@ impl FlatGraph {
         index: usize,
         color: Color,
         direction: VertexDirection,
-    ) -> Result<(), &str> {
+    ) -> Result<(), &'static str> {
         if self.current_size >= self.max_capacity - 1 {
             return Err("Cannot add vertex at index >= graph max capacity - 1");
         }
@@ -107,7 +107,7 @@ impl FlatGraph {
         Ok(())
     }
 
-    pub fn remove_node(&mut self, index: usize) -> Result<(), &str> {
+    pub fn remove_node(&mut self, index: usize) -> Result<(), &'static str> {
         if index >= self.max_capacity {
             return Err("Index is out of bounds");
         }
@@ -171,13 +171,13 @@ impl fmt::Display for FlatGraph {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-pub(crate) enum VertexDirection {
+pub enum VertexDirection {
     LEFT,
     RIGHT,
 }
 
 #[derive(Clone, Copy)]
-pub(crate) struct Vertex {
+pub struct Vertex {
     pub color: Color,
     pub direction: VertexDirection,
 }
@@ -192,7 +192,7 @@ impl fmt::Display for Vertex {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-pub(crate) enum Color {
+pub enum Color {
     RED,
     BLUE,
 }
